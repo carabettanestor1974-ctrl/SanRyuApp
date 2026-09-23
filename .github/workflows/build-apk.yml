@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ShanRyu-APK
-          path: shanryu_v13/app/build/outputs/apk/debug/*.apk        working-directory: shanryu_v13
+          path: "shanryu_v13/app/build/outputs/apk/debug/*.apk"        working-directory: shanryu_v13
         run: gradle assembleDebug
 
       - name: Guardar APK
