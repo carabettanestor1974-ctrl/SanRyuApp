@@ -20,31 +20,18 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Preparar Android SDK
-        run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platform-tools"
-          sdkmanager "platforms;android-35"
-          sdkmanager "build-tools;35.0.0"
-
-      - name: Descomprimir proyecto ShanRyu
-        run: |
-          mkdir -p shanryu
-          ZIP=$(find . -type f -name "*.zip" | head -n 1)
-          echo "ZIP encontrado: $ZIP"
-          unzip -o "$ZIP" -d shanryu
-
       - name: Buscar proyecto Android
         run: |
-          echo "Buscando gradlew..."
-          find shanryu -name gradlew -type f
+          echo "Buscando Gradle..."
+          find . -name gradlew -type f
 
       - name: Compilar APK
         run: |
-          GRADLEW=$(find shanryu -name gradlew -type f | head -n 1)
+          GRADLEW=$(find . -name gradlew -type f | head -n 1)
+          echo "Gradle encontrado en: $GRADLEW"
+          chmod +x "$GRADLEW"
           PROJECT_DIR=$(dirname "$GRADLEW")
           cd "$PROJECT_DIR"
-          chmod +x gradlew
           ./gradlew assembleDebug --stacktrace
 
       - name: Guardar APK
@@ -52,4 +39,4 @@ jobs:
         with:
           name: ShanRyu-APK
           path: |
-            shanryu/**/build/outputs/apk/**/*.apk
+            **/build/outputs/apk/**/*.apk
