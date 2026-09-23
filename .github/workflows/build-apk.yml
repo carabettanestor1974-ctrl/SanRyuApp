@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - principal
 
 jobs:
-  build-apk:
+  compilar-apk:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,31 +21,35 @@ jobs:
           java-version: '17'
 
       - name: Preparar Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Instalar Android 36
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager "platforms;android-36" "build-tools;36.0.0"
-
-      - name: Preparar Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.11.1'
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools"
+          sdkmanager "platforms;android-35"
+          sdkmanager "build-tools;35.0.0"
 
       - name: Descomprimir proyecto ShanRyu
         run: |
-          mkdir -p proyecto
-          unzip -q ShanRyu_V13_APK*.zip -d proyecto
+          mkdir -p shanryu
+          ZIP=$(find . -type f -name "*.zip" | head -n 1)
+          echo "ZIP encontrado: $ZIP"
+          unzip -o "$ZIP" -d shanryu
+
+      - name: Buscar proyecto Android
+        run: |
+          echo "Buscando gradlew..."
+          find shanryu -name gradlew -type f
 
       - name: Compilar APK
         run: |
-          PROJECT_DIR=$(find proyecto -name settings.gradle -printf '%h\n' | head -1)
-          echo "Proyecto encontrado en: $PROJECT_DIR"
-          gradle -p "$PROJECT_DIR" assembleDebug
+          GRADLEW=$(find shanryu -name gradlew -type f | head -n 1)
+          PROJECT_DIR=$(dirname "$GRADLEW")
+          cd "$PROJECT_DIR"
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
 
       - name: Guardar APK
         uses: actions/upload-artifact@v4
         with:
           name: ShanRyu-APK
-          path: proyecto/**/app/build/outputs/apk/debug/app-debug.apk
+          path: |
+            shanryu/**/build/outputs/apk/**/*.apk
