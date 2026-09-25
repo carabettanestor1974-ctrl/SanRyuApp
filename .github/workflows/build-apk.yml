@@ -38,5 +38,4 @@ jobs:
       - name: Guardar APK
         uses: actions/upload-artifact@v4
         with:
-          name: ShanRyu-APK
-          path: "shanryu_v13/app/build/outputs/apk/debug/*.apk"
+          path: shanryu_v13/app/build/outputs/apk/debug/*.apk
