@@ -967,6 +967,7 @@ function setupAdminUI(){
 }
 function setupProfessorUI(){
  setAdminActionButtons(false);
+ const el=$('newAnnouncementBtn'); if(el) el.classList.remove('hidden');
  const ai=$('authorityAdminIntro'); if(ai) ai.classList.add('hidden');
  const ei=$('eventsIntro'); if(ei) ei.textContent='';
  $('adminHero').classList.add('hidden');$('studentHero').classList.remove('hidden');$('adminStats').classList.add('hidden');
@@ -1200,7 +1201,7 @@ function renderAnnouncements(){
  $('announcementsList').innerHTML=list.length?list.map(a=>`
   <div class="item"><div class="item-main"><div class="item-title">${esc(announcementTitle(a))}</div>
   <div class="item-sub">${esc(announcementText(a))}</div><div class="small">${esc(a.published_at||'')}</div></div>
-  ${isAdmin()?`<div class="material-actions"><button class="btn mini" onclick="openAnnouncementModal('${a.id}')">Editar</button><button class="btn danger mini" onclick="confirmDeleteAnnouncement('${a.id}')">Eliminar</button></div>`:''}</div>`).join(''):'<div class="empty">Todavía no hay comunicados.</div>';
+  ${(isAdmin()||isProfessor())?`<div class="material-actions"><button class="btn mini" onclick="openAnnouncementModal('${a.id}')">Editar</button><button class="btn danger mini" onclick="confirmDeleteAnnouncement('${a.id}')">Eliminar</button></div>`:''}</div>`).join(''):'<div class="empty">Todavía no hay comunicados.</div>';
 }
 function renderHomeAnnouncements(){
  const list=data.announcements.slice(0,3);
@@ -1524,23 +1525,23 @@ async function saveAchievement(id){if(!isAdmin())return;
  try{await api(id?'/rest/v1/logros?id=eq.'+encodeURIComponent(id):'/rest/v1/logros',{method:id?'PATCH':'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(body)});hideModal();await refreshData()}catch(e){msg($('formMsg'),'No se pudo guardar el logro: '+e.message,'error')}
 }
 /* COMUNICADOS */
-function openAnnouncementModal(id=''){if(!isAdmin())return;
+function openAnnouncementModal(id=''){if(!isAdmin()&&!isProfessor())return;
  const a=id?data.announcements.find(x=>x.id===id):{};
  showModal(id?'Editar comunicado':'Nuevo comunicado',`<div class="field"><label>Título</label><input id="n_title" class="input" value="${esc(a?.title||'')}"></div><div class="field"><label>Mensaje</label><textarea id="n_body" class="textarea">${esc(a?.body||'')}</textarea></div><div id="formMsg"></div><div class="form-actions"><button class="btn" onclick="hideModal()">Cancelar</button><button class="btn red" onclick="saveAnnouncement('${id}')">Guardar</button></div>`);
 }
-function confirmDeleteAnnouncement(id){if(!isAdmin())return;
+function confirmDeleteAnnouncement(id){if(!isAdmin()&&!isProfessor())return;
  const a=data.announcements.find(x=>x.id===id);
  if(!a)return;
  showModal('Eliminar comunicado',`<div class="confirm"><b>¿Está seguro de que desea eliminar este comunicado?</b><p class="muted">"${esc(a.title||'Sin título')}"</p><div class="status error">Esta acción no se puede deshacer.</div></div><div class="form-actions"><button class="btn" onclick="hideModal()">Cancelar</button><button class="btn danger" onclick="deleteAnnouncement('${id}')">Eliminar</button></div>`);
 }
-async function deleteAnnouncement(id){if(!isAdmin())return;
+async function deleteAnnouncement(id){if(!isAdmin()&&!isProfessor())return;
  try{
   await api('/rest/v1/comunicados?id=eq.'+encodeURIComponent(id),{method:'DELETE'});
   hideModal();
   await refreshData();
  }catch(e){showModal('No se pudo eliminar',`<div class="status error">${esc(e.message)}</div><div class="form-actions"><button class="btn" onclick="hideModal()">Cerrar</button></div>`)}
 }
-async function saveAnnouncement(id){if(!isAdmin())return;
+async function saveAnnouncement(id){if(!isAdmin()&&!isProfessor())return;
  const body={titulo:$('n_title').value.trim(),cuerpo:$('n_body').value.trim(),publicado_at:new Date().toISOString()};
  if(!body.titulo||!body.cuerpo){msg($('formMsg'),'Completá título y mensaje.','error');return}
  try{await api(id?'/rest/v1/comunicados?id=eq.'+encodeURIComponent(id):'/rest/v1/comunicados',{method:id?'PATCH':'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(body)});hideModal();await refreshData()}catch(e){msg($('formMsg'),'No se pudo guardar el comunicado: '+e.message,'error')}
