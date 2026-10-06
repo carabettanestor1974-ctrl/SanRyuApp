@@ -62,7 +62,6 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         webView.stopLoading()
         webView.webChromeClient = null
-        webView.webViewClient = null
         webView.destroy()
         super.onDestroy()
     }
