@@ -954,7 +954,7 @@ async function loadApp(){
  }catch(e){if(String(e.message).includes('401')){logout();return}msg($('loginMsg'),e.message,'error')}
 }
 function setAdminActionButtons(show){
- const ids=['newStudentBtn','newChargeBtn','newAttendanceBtn','newAnnouncementBtn','newAuthorityBtn','newEventBtn','newFolderBtn','uploadMaterialBtn'];
+ const ids=['newStudentBtn','newChargeBtn','newAttendanceBtn','newAuthorityBtn','newEventBtn','newFolderBtn','uploadMaterialBtn'];
  ids.forEach(id=>{const el=$(id);if(el)el.classList.toggle('hidden',!show)});
 }
 function setupAdminUI(){
@@ -1200,7 +1200,7 @@ function renderAnnouncements(){
  const list=data.announcements;
  $('announcementsList').innerHTML=list.length?list.map(a=>`
   <div class="item"><div class="item-main"><div class="item-title">${esc(announcementTitle(a))}</div>
-  <div class="item-sub">${esc(announcementText(a))}</div><div class="small">${esc(a.published_at||'')}</div></div>
+  <div class="item-sub">${esc(announcementText(a))}</div></div>
   ${(isAdmin()||isProfessor())?`<div class="material-actions"><button class="btn mini" onclick="openAnnouncementModal('${a.id}')">Editar</button><button class="btn danger mini" onclick="confirmDeleteAnnouncement('${a.id}')">Eliminar</button></div>`:''}</div>`).join(''):'<div class="empty">Todavía no hay comunicados.</div>';
 }
 function renderHomeAnnouncements(){
