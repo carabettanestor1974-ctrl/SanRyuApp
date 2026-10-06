@@ -57,6 +57,17 @@ class MainActivity : AppCompatActivity() {
             override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                 return false
             }
+
+            override fun onPageFinished(view: WebView, url: String) {
+                super.onPageFinished(view, url)
+                view.evaluateJavascript("""
+                    (function() {
+                      var s = document.createElement('style');
+                      s.innerHTML = '#coverView{overflow-y:auto!important;overflow-x:hidden!important;max-height:none!important;padding-bottom:calc(14px + env(safe-area-inset-bottom, 0px))!important;} #coverView .cover-stage{height:auto!important;min-height:100%!important;max-height:none!important;overflow:visible!important;} #coverView .cover-art{max-height:calc(100dvh - 215px)!important;} #coverView .cover-btn{height:58px!important;min-height:58px!important;}';
+                      document.head.appendChild(s);
+                    })();
+                """.trimIndent(), null)
+            }
         }
         webView.webChromeClient = WebChromeClient()
         setContentView(webView)
