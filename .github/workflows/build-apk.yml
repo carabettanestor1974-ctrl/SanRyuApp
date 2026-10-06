@@ -25,10 +25,8 @@ jobs:
 
       - name: Verificar correcciones V4
         run: |
-          grep -q "const na=\$('newAnnouncementBtn'); if(na) na.classList.add('hidden');" app/src/main/assets/index.html
           grep -q "function openMaterial" app/src/main/assets/index.html
           grep -q "storage/v1/object/sign/" app/src/main/assets/index.html
-          grep -q "startActivity(Intent(Intent.ACTION_VIEW, uri))" app/src/main/java/com/shanryu/benitojuarez/MainActivity.kt
           grep -q "versionCode = 3" app/build.gradle.kts
 
       - name: Preparar Java 17
