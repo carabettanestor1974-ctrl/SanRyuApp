@@ -110,3 +110,5 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
     }
 }
+
+// V4 build trigger: keep the approved WebView/photo-picker implementation intact.
