@@ -673,7 +673,13 @@ function api(path,options={}){
  if(session?.access_token)headers.Authorization='Bearer '+session.access_token;
  return fetch(CONFIG.url+path,Object.assign({},options,{headers})).then(async r=>{
    const t=await r.text();let b=null;try{b=t?JSON.parse(t):null}catch(_){b=t}
-   if(!r.ok)throw new Error(b?.message||b?.error_description||b?.hint||('HTTP '+r.status));
+   if(!r.ok){
+     const detail=b?.message||b?.error_description||b?.hint||b?.details||b?.detail||b?.msg||'';
+     const code=b?.code||b?.error_code||'';
+     const e=new Error(detail||('HTTP '+r.status));
+     e.status=r.status;e.code=code;e.details=b;
+     throw e;
+   }
    return b;
  });
 }
@@ -791,7 +797,7 @@ function backToTeacherChoiceFromRegistration(){hideEntryViews();$('teacherChoice
 async function registerTeacher(){
  const nombre=$('prof_nombre').value.trim(),nacimiento=birthIso('prof_nacimiento'),telefono=$('prof_telefono').value.trim(),email=$('prof_email').value.trim().toLowerCase(),domicilio=$('prof_domicilio').value.trim(),disciplina=$('prof_disciplina').value,password=$('prof_password').value,password2=$('prof_password2').value;
  if(!nombre||!nacimiento||!email||!password){msg($('teacherRegistrationMsg'),'Completá los campos obligatorios.','error');return}
- if(password.length<6){msg($('teacherRegistrationMsg'),'La contraseña debe tener al menos 6 caracteres.','error');return}
+ if(password.length<8){msg($('teacherRegistrationMsg'),'La contraseña debe tener al menos 8 caracteres.','error');return}
  if(password!==password2){msg($('teacherRegistrationMsg'),'Las contraseñas no coinciden.','error');return}
  msg($('teacherRegistrationMsg'),'Creando acceso de profesor…');
  try{
@@ -813,7 +819,14 @@ async function registerTeacher(){
      return;
    }
    msg($('teacherRegistrationMsg'),'Cuenta creada. Si Supabase solicita confirmación de correo, confirmalo y luego ingresá como profesor.','ok');
- }catch(e){msg($('teacherRegistrationMsg'),'No se pudo completar el registro: '+e.message,'error')}
+ }catch(e){
+   const m=String(e.message||'');
+   if(e.code==='weak_password'||/password.*(weak|8 characters|8 caracteres)/i.test(m)) msg($('teacherRegistrationMsg'),'La contraseña debe tener al menos 8 caracteres.','error');
+   else if(e.code==='user_already_exists'||/already registered|already exists|ya está registrado/i.test(m)) msg($('teacherRegistrationMsg'),'Ese correo ya está registrado. Usá otro correo o ingresá con la cuenta existente.','error');
+   else if(e.status===422) msg($('teacherRegistrationMsg'),'Supabase rechazó los datos del registro. Revisá el correo y la contraseña e intentá nuevamente.','error');
+   else if(e.status===500) msg($('teacherRegistrationMsg'),'Supabase tuvo un error interno al crear la cuenta. El formulario está correcto; hay que revisar la configuración de autenticación/base de datos.','error');
+   else msg($('teacherRegistrationMsg'),'No se pudo completar el registro: '+m,'error');
+ }
 }
 
 function backStudentChoice(){hideEntryViews();$('coverView').classList.remove('hidden');}
@@ -853,10 +866,10 @@ function previewRegistrationPhoto(input){
  const r=new FileReader(); r.onload=()=>{if(img)img.src=r.result;box?.classList.remove('hidden')}; r.readAsDataURL(file);
 }
 async function registerStudent(){
- const nombre=$('reg_nombre').value.trim(),nacimiento=$('reg_nacimiento').value,telefono=$('reg_telefono').value.trim(),email=$('reg_email').value.trim().toLowerCase(),domicilio=$('reg_domicilio').value.trim(),disciplina=$('reg_disciplina').value,password=$('reg_password').value,password2=$('reg_password2').value;
+ const nombre=$('reg_nombre').value.trim(),nacimiento=birthIso('reg_nacimiento'),telefono=$('reg_telefono').value.trim(),email=$('reg_email').value.trim().toLowerCase(),domicilio=$('reg_domicilio').value.trim(),disciplina=$('reg_disciplina').value,password=$('reg_password').value,password2=$('reg_password2').value;
  const age=registrationAge();
  if(!nombre||!nacimiento||!email||!disciplina||!password){msg($('registrationMsg'),'Completá los campos obligatorios.','error');return}
- if(password.length<6){msg($('registrationMsg'),'La contraseña debe tener al menos 6 caracteres.','error');return}
+ if(password.length<8){msg($('registrationMsg'),'La contraseña debe tener al menos 8 caracteres.','error');return}
  if(password!==password2){msg($('registrationMsg'),'Las contraseñas no coinciden.','error');return}
  if(age!==null&&age<18&&!$('reg_resp_nombre').value.trim()){msg($('registrationMsg'),'Completá los datos del responsable.','error');return}
  msg($('registrationMsg'),'Registrando solicitud…');
@@ -897,7 +910,10 @@ async function registerStudent(){
    setTimeout(()=>{logout();},1200);
  }catch(e){
    const m=String(e.message||'');
-   if(m.includes('HTTP 429')) msg($('registrationMsg'),'Supabase está limitando temporalmente los registros. Esperá unos minutos antes de volver a intentarlo.','error');
+   if(e.code==='weak_password'||/password.*(weak|8 characters|8 caracteres)/i.test(m)) msg($('registrationMsg'),'La contraseña debe tener al menos 8 caracteres.','error');
+   else if(m.includes('HTTP 429')||e.code==='over_request_rate_limit'||e.code==='over_email_send_rate_limit') msg($('registrationMsg'),'Supabase está limitando temporalmente los registros. Esperá unos minutos antes de volver a intentarlo.','error');
+   else if(e.code==='user_already_exists'||/already registered|already exists|ya está registrado/i.test(m)) msg($('registrationMsg'),'Ese correo ya está registrado. Usá otro correo o ingresá con la cuenta existente.','error');
+   else if(e.status===500) msg($('registrationMsg'),'La cuenta no pudo crearse por un error interno de Supabase. El formulario ya envía la fecha en formato correcto; si vuelve a aparecer, hay que revisar el trigger/base de datos de Supabase.','error');
    else msg($('registrationMsg'),'No se pudo completar el registro: '+m,'error');
  }
 }
