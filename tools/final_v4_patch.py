@@ -12,10 +12,11 @@ new_open = """async function openMaterial(path){
  try{
    let target=path;
    if(!/^https?:\\/\\//i.test(path)){
-     const signed=await api('/storage/v1/object/sign/'+CONFIG.materialBucket+'/'+encodeURIComponent(path),{method:'POST',body:JSON.stringify({expiresIn:3600})});
+     const safePath=path.split('/').map(encodeURIComponent).join('/');
+     const signed=await api('/storage/v1/object/sign/'+CONFIG.materialBucket+'/'+safePath,{method:'POST',body:JSON.stringify({expiresIn:3600})});
      const signedPath=signed?.signedURL||signed?.signedUrl||'';
      if(!signedPath)throw new Error('No se pudo generar el acceso al PDF.');
-     target=/^https?:\\/\\//i.test(signedPath)?signedPath:CONFIG.url+signedPath;
+     target=/^https?:\\/\\//i.test(signedPath)?signedPath:(signedPath.startsWith('/object/')?CONFIG.url+'/storage/v1'+signedPath:CONFIG.url+signedPath);
    }
    location.href=target;
  }catch(e){
