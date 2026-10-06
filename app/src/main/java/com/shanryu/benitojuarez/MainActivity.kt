@@ -36,9 +36,6 @@ class MainActivity : AppCompatActivity() {
             settings.allowContentAccess = false
             settings.mediaPlaybackRequiresUserGesture = false
             settings.javaScriptCanOpenWindowsAutomatically = false
-            settings.loadWithOverviewMode = true
-            settings.useWideViewPort = true
-            setInitialScale(85)
             CookieManager.getInstance().setAcceptCookie(true)
             CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
         }
@@ -69,12 +66,13 @@ class MainActivity : AppCompatActivity() {
                       if (old) old.remove();
                       var s = document.createElement("style");
                       s.id = "shanryuAndroidFix";
-                      s.innerHTML = "html,body{overflow-x:hidden!important;} #coverView{overflow-y:auto!important;overflow-x:hidden!important;max-height:none!important;padding-bottom:24px!important;} #coverView .cover-stage{height:auto!important;min-height:100%!important;max-height:none!important;overflow:visible!important;}";
+                      s.innerHTML = "html{zoom:0.72!important;overflow-x:hidden!important;} body{width:138.888889%!important;overflow-x:hidden!important;} .bottom-nav{width:138.888889%!important;right:auto!important;} .modal{width:138.888889%!important;right:auto!important;} #coverView{overflow-y:auto!important;overflow-x:hidden!important;max-height:none!important;padding-bottom:24px!important;} #coverView .cover-stage{height:auto!important;min-height:100%!important;max-height:none!important;overflow:visible!important;}";
                       document.head.appendChild(s);
                     })();
                 """.trimIndent(), null)
             }
         }
+
         webView.webChromeClient = WebChromeClient()
         setContentView(webView)
         webView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
