@@ -4,7 +4,8 @@ import re
 html = Path("app/src/main/assets/index.html")
 s = html.read_text(encoding="utf-8")
 
-# Run 66 already contains the alumno + Aviso correction. This patch only adds the material-opening fix and bumps the APK version.
+# Run 66 already contains the alumno + Aviso correction.
+# Rebuild trigger: PDF material path correction is included below. This patch only adds the material-opening fix and bumps the APK version.
 
 new_open = """async function openMaterial(path){
  if(!path){showModal('Archivo','<div class="empty">El material todavía no tiene un archivo asociado.</div>');return}
