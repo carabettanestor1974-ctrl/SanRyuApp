@@ -1,6 +1,8 @@
 package com.shanryu.benitojuarez
 
 import android.annotation.SuppressLint
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -11,18 +13,13 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.webkit.WebViewAssetLoader
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
-
-    private val filePicker = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        filePathCallback?.onReceiveValue(uri?.let { arrayOf(it) })
-        filePathCallback = null
-    }
+    private val fileChooserRequest = 4101
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,36 +47,52 @@ class MainActivity : AppCompatActivity() {
             .build()
 
         webView.webViewClient = object : WebViewClient() {
-            override fun shouldInterceptRequest(
-                view: WebView,
-                request: WebResourceRequest
-            ) = assetLoader.shouldInterceptRequest(request.url)
+            override fun shouldInterceptRequest(view: WebView, request: WebResourceRequest) =
+                assetLoader.shouldInterceptRequest(request.url)
 
-            override fun shouldOverrideUrlLoading(
-                view: WebView,
-                request: WebResourceRequest
-            ): Boolean = false
+            override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean =
+                false
         }
 
         webView.webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(
-                webView: WebView?,
+                view: WebView?,
                 callback: ValueCallback<Array<Uri>>?,
-                fileChooserParams: FileChooserParams?
+                params: FileChooserParams?
             ): Boolean {
                 filePathCallback?.onReceiveValue(null)
                 filePathCallback = callback
-                val accept = fileChooserParams?.acceptTypes
+
+                val accept = params?.acceptTypes
+                    ?.flatMap { it.split(",") }
                     ?.firstOrNull { it.isNotBlank() }
+                    ?.trim()
                     ?.takeIf { it != "*/*" }
                     ?: "*/*"
-                filePicker.launch(accept)
+
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = accept
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+                }
+                startActivityForResult(intent, fileChooserRequest)
                 return true
             }
         }
 
         setContentView(webView)
         webView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != fileChooserRequest) return
+        val callback = filePathCallback
+        filePathCallback = null
+        if (callback == null) return
+        val uri = if (resultCode == Activity.RESULT_OK) data?.data else null
+        callback.onReceiveValue(uri?.let { arrayOf(it) })
     }
 
     @Deprecated("Deprecated in Java")
