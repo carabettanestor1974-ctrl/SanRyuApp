@@ -25,8 +25,8 @@ jobs:
         run: |
           grep -q "function openBirthCalendar" app/src/main/assets/index.html
           grep -q "function acceptBirthCalendar" app/src/main/assets/index.html
-          grep -q "id="f_photo"" app/src/main/assets/index.html
-          grep -q "id="prof_foto"" app/src/main/assets/index.html
+          grep -q 'id="f_photo"' app/src/main/assets/index.html
+          grep -q 'id="prof_foto"' app/src/main/assets/index.html
           echo "Calendario propio y campos de foto verificados."
       - name: Preparar Java 17
         uses: actions/setup-java@v4
