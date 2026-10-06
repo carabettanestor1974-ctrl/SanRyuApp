@@ -70,8 +70,9 @@ class MainActivity : AppCompatActivity() {
                     ?.takeIf { it != "*/*" }
                     ?: "*/*"
 
-                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     type = accept
                     putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
                 }
