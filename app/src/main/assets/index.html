@@ -981,6 +981,7 @@ function setupProfessorUI(){
 }
 function setupStudentUI(){
  setAdminActionButtons(false);
+ const el=$('newAnnouncementBtn'); if(el) el.classList.add('hidden');
  const ai=$('authorityAdminIntro'); if(ai) ai.classList.add('hidden');
  const ei=$('eventsIntro'); if(ei) ei.textContent='';
  $('adminHero').classList.add('hidden');$('studentHero').classList.remove('hidden');$('adminStats').classList.add('hidden');
