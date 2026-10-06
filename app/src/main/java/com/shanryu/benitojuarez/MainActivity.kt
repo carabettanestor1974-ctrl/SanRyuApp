@@ -29,6 +29,7 @@ class MainActivity : AppCompatActivity() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             setBackgroundColor(Color.rgb(8, 9, 10))
+
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
@@ -36,6 +37,13 @@ class MainActivity : AppCompatActivity() {
             settings.allowContentAccess = false
             settings.mediaPlaybackRequiresUserGesture = false
             settings.javaScriptCanOpenWindowsAutomatically = false
+
+            // Reducir la escala de TODA la aplicación, incluidos diálogos,
+            // menús, perfiles y la portada, para dejar margen a las barras de Android.
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            setInitialScale(80)
+
             CookieManager.getInstance().setAcceptCookie(true)
             CookieManager.getInstance().setAcceptThirdPartyCookies(this, true)
         }
@@ -67,44 +75,13 @@ class MainActivity : AppCompatActivity() {
 
                       var s = document.createElement('style');
                       s.id = 'shanryuAndroidFix';
-                      s.innerHTML = '#{REPLACE}';
+                      s.innerHTML = '#coverView{overflow-y:auto!important;overflow-x:hidden!important;max-height:none!important;padding-bottom:24px!important;} #coverView .cover-stage{height:auto!important;min-height:100%!important;max-height:none!important;overflow:visible!important;} #coverView .cover-btn{min-height:58px!important;height:58px!important;}';
                       document.head.appendChild(s);
                     })();
-                """.trimIndent().replace("#{REPLACE}", """
-                  html {
-                    overflow-x: hidden !important;
-                  }
-
-                  body {
-                    zoom: 0.90 !important;
-                    overflow-x: hidden !important;
-                  }
-
-                  #coverView {
-                    overflow-y: auto !important;
-                    overflow-x: hidden !important;
-                    max-height: none !important;
-                    padding-bottom: calc(18px + env(safe-area-inset-bottom, 0px)) !important;
-                  }
-
-                  #coverView .cover-stage {
-                    height: auto !important;
-                    min-height: 100% !important;
-                    max-height: none !important;
-                    overflow: visible !important;
-                  }
-
-                  #coverView .cover-art {
-                    max-height: calc(100dvh - 215px) !important;
-                  }
-
-                  #coverView .cover-btn {
-                    height: 58px !important;
-                    min-height: 58px !important;
-                  }
-                """.trimIndent()), null)
+                """.trimIndent(), null)
             }
         }
+
         webView.webChromeClient = WebChromeClient()
         setContentView(webView)
         webView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
