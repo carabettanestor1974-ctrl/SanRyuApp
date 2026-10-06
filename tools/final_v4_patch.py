@@ -25,7 +25,7 @@ new_open = """async function openMaterial(path){
 pattern = r"async function openMaterial\(path\)\{.*?\nfunction openMaterialModal\(\)"
 if not re.search(pattern, s, re.S):
     raise SystemExit("No se encontró openMaterial")
-s = re.sub(pattern, new_open + "\nfunction openMaterialModal(", s, count=1, flags=re.S)
+s = re.sub(pattern, new_open + "\nfunction openMaterialModal()", s, count=1, flags=re.S)
 html.write_text(s, encoding="utf-8")
 
 gradle = Path("app/build.gradle.kts")
