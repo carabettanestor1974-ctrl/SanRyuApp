@@ -967,6 +967,7 @@ function setupAdminUI(){
 }
 function setupProfessorUI(){
  setAdminActionButtons(false);
+ const na=$('newAnnouncementBtn'); if(na) na.classList.remove('hidden');
  const announcementBtn=$('newAnnouncementBtn'); if(announcementBtn) announcementBtn.classList.remove('hidden');
  const el=$('newAnnouncementBtn'); if(el) el.classList.remove('hidden');
  const ai=$('authorityAdminIntro'); if(ai) ai.classList.add('hidden');
