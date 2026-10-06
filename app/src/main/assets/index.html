@@ -463,7 +463,7 @@ a{color:var(--gold2)}
     <h2>Registro de alumno</h2>
     <p class="hint">Completá tus datos. La solicitud quedará pendiente de autorización por la escuela.</p>
     <div class="field"><label>Nombre y apellido</label><input id="reg_nombre" class="input" type="text" autocomplete="name" placeholder="Nombre y apellido"></div>
-    <div class="field"><label>Fecha de nacimiento</label><input id="reg_nacimiento" class="input" type="date" inputmode="none" onclick="if(this.showPicker){try{this.showPicker()}catch(e){}}" onfocus="if(this.showPicker){try{this.showPicker()}catch(e){}}" onchange="updateRegistrationMinorFields()"></div>
+    <div class="field"><label>Fecha de nacimiento</label><input id="reg_nacimiento" class="input" type="text" readonly placeholder="dd/mm/aaaa" onclick="openBirthCalendar('reg_nacimiento')"></div>
     <div class="field"><label>Teléfono</label><input id="reg_telefono" class="input" type="tel" autocomplete="tel" placeholder="Teléfono"></div>
     <div class="field"><label>Correo electrónico</label><input id="reg_email" class="input" type="email" autocomplete="email" placeholder="correo@ejemplo.com"></div>
     <div class="field"><label>Domicilio</label><input id="reg_domicilio" class="input" type="text" autocomplete="street-address" placeholder="Domicilio"></div>
@@ -495,7 +495,7 @@ a{color:var(--gold2)}
     <h2>Registro de profesor</h2>
     <p class="hint">Completá tus datos como adulto. Al finalizar, el acceso queda habilitado directamente.</p>
     <div class="field"><label>Nombre y apellido</label><input id="prof_nombre" class="input" type="text" autocomplete="name" placeholder="Nombre y apellido"></div>
-    <div class="field"><label>Fecha de nacimiento</label><input id="prof_nacimiento" class="input" type="date" inputmode="none"></div>
+    <div class="field"><label>Fecha de nacimiento</label><input id="prof_nacimiento" class="input" type="text" readonly placeholder="dd/mm/aaaa" onclick="openBirthCalendar('prof_nacimiento')"></div>
     <div class="field"><label>Teléfono</label><input id="prof_telefono" class="input" type="tel" autocomplete="tel" placeholder="Teléfono"></div>
     <div class="field"><label>Correo electrónico</label><input id="prof_email" class="input" type="email" autocomplete="email" placeholder="correo@ejemplo.com"></div>
     <div class="field"><label>Domicilio</label><input id="prof_domicilio" class="input" type="text" autocomplete="street-address" placeholder="Domicilio"></div>
@@ -789,7 +789,7 @@ function openTeacherRegistration(){
 function backTeacherChoice(){hideEntryViews();$('coverView').classList.remove('hidden');}
 function backToTeacherChoiceFromRegistration(){hideEntryViews();$('teacherChoiceView').classList.remove('hidden');}
 async function registerTeacher(){
- const nombre=$('prof_nombre').value.trim(),nacimiento=$('prof_nacimiento').value,telefono=$('prof_telefono').value.trim(),email=$('prof_email').value.trim().toLowerCase(),domicilio=$('prof_domicilio').value.trim(),disciplina=$('prof_disciplina').value,password=$('prof_password').value,password2=$('prof_password2').value;
+ const nombre=$('prof_nombre').value.trim(),nacimiento=birthIso('prof_nacimiento'),telefono=$('prof_telefono').value.trim(),email=$('prof_email').value.trim().toLowerCase(),domicilio=$('prof_domicilio').value.trim(),disciplina=$('prof_disciplina').value,password=$('prof_password').value,password2=$('prof_password2').value;
  if(!nombre||!nacimiento||!email||!password){msg($('teacherRegistrationMsg'),'Completá los campos obligatorios.','error');return}
  if(password.length<6){msg($('teacherRegistrationMsg'),'La contraseña debe tener al menos 6 caracteres.','error');return}
  if(password!==password2){msg($('teacherRegistrationMsg'),'Las contraseñas no coinciden.','error');return}
@@ -819,8 +819,20 @@ async function registerTeacher(){
 function backStudentChoice(){hideEntryViews();$('coverView').classList.remove('hidden');}
 function backToStudentChoiceFromRegistration(){hideEntryViews();$('studentChoiceView').classList.remove('hidden');}
 function backToCover(){hideEntryViews();$('coverView').classList.remove('hidden');$('loginMsg').innerHTML=''}
+let shanBirthCalendarTarget='';let shanBirthCalendarValue='';
+function normalizeBirthDate(v){const x=String(v||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(x))return x;const m=x.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);return m?m[3]+'-'+m[2]+'-'+m[1]:'';}
+function formatBirthDate(v){const x=normalizeBirthDate(v);if(!x)return '';const p=x.split('-');return p[2]+'/'+p[1]+'/'+p[0];}
+function birthIso(id){const e=$(id);return normalizeBirthDate(e?.dataset?.iso||e?.value||'');}
+function setBirthInput(id,x){const e=$(id);if(!e)return;e.dataset.iso=x;e.value=formatBirthDate(x);e.dispatchEvent(new Event('change',{bubbles:true}));}
+function openBirthCalendar(id){const e=$(id);if(!e)return;shanBirthCalendarTarget=id;shanBirthCalendarValue=birthIso(id);if(!shanBirthCalendarValue){const n=new Date();shanBirthCalendarValue=(n.getFullYear()-18)+'-'+String(n.getMonth()+1).padStart(2,'0')+'-'+String(n.getDate()).padStart(2,'0')}renderBirthCalendar();$('shanBirthCalendar').classList.remove('hidden')}
+function closeBirthCalendar(){$('shanBirthCalendar').classList.add('hidden')}
+function renderBirthCalendar(){const r=$('shanBirthCalendar'),p=normalizeBirthDate(shanBirthCalendarValue).split('-'),y=+p[0],m=+p[1],n=new Date(),months=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];let days=new Date(y,m,0).getDate(),start=(new Date(y,m-1,1).getDay()+6)%7,g='';for(let i=0;i<start;i++)g+='<span></span>';for(let d=1;d<=days;d++){let x=y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0');g+='<button type="button" class="sr-date-day '+(x===shanBirthCalendarValue?'selected':'')+'" onclick="chooseBirthDay(\''+x+'\')">'+d+'</button>'}let ys='';for(let yy=n.getFullYear();yy>=1900;yy--)ys+='<option '+(yy===y?'selected':'')+'>'+yy+'</option>';r.innerHTML='<div class="sr-date-backdrop" onclick="closeBirthCalendar()"></div><div class="sr-date-card"><b>Fecha de nacimiento</b><div class="sr-date-head"><select class="select" onchange="changeBirthMonth(this.value)">'+months.map((q,i)=>'<option value="'+(i+1)+'" '+(i+1===m?'selected':'')+'>'+q+'</option>').join('')+'</select><select class="select" onchange="changeBirthYear(this.value)">'+ys+'</select></div><div class="sr-date-week">L M M J V S D</div><div class="sr-date-grid">'+g+'</div><div class="sr-date-actions"><button type="button" class="btn" onclick="closeBirthCalendar()">Cancelar</button><button type="button" class="btn red" onclick="acceptBirthCalendar()">ACEPTAR</button></div></div>'}
+function changeBirthMonth(v){const p=normalizeBirthDate(shanBirthCalendarValue).split('-'),d=Math.min(+p[2],new Date(+p[0],+v,0).getDate());shanBirthCalendarValue=p[0]+'-'+String(v).padStart(2,'0')+'-'+String(d).padStart(2,'0');renderBirthCalendar()}
+function changeBirthYear(v){const p=normalizeBirthDate(shanBirthCalendarValue).split('-'),d=Math.min(+p[2],new Date(+v,+p[1],0).getDate());shanBirthCalendarValue=v+'-'+p[1]+'-'+String(d).padStart(2,'0');renderBirthCalendar()}
+function chooseBirthDay(v){shanBirthCalendarValue=v;renderBirthCalendar()}
+function acceptBirthCalendar(){setBirthInput(shanBirthCalendarTarget,shanBirthCalendarValue);if(shanBirthCalendarTarget==='reg_nacimiento')updateRegistrationMinorFields();if(shanBirthCalendarTarget==='f_birth')updateStudentMinorFields();closeBirthCalendar()}
 function registrationAge(){
- const v=$('reg_nacimiento')?.value; if(!v)return null;
+ const v=birthIso('reg_nacimiento'); if(!v)return null;
  const b=new Date(v+'T00:00:00'); const now=new Date(); let age=now.getFullYear()-b.getFullYear(); const m=now.getMonth()-b.getMonth(); if(m<0||(m===0&&now.getDate()<b.getDate()))age--; return age;
 }
 function updateRegistrationMinorFields(){
@@ -1293,7 +1305,7 @@ function updateStudentConditionalFields(){
  const medication=document.getElementById('f_medication');
  toggleStudentField('physicalDetailsWrap', physical?.value==='yes');
  toggleStudentField('medicationDetailsWrap', medication?.value==='yes');
- calculateAge(document.getElementById('f_birth')?.value||'');
+ calculateAge(birthIso('f_birth'));
 }
 function updateStudentMinorFields(){updateStudentConditionalFields()}
 /* ALUMNOS */
@@ -1311,7 +1323,7 @@ function openStudentModal(id=''){if(!isAdmin())return;
       <div style="flex:1"><input id="f_photo" class="input" type="file" accept="image/*" onchange="handleStudentPhoto(this)"><div id="studentPhotoName" class="small">${existingPhoto?'Foto cargada':'Podés agregar una foto o dejarla sin foto.'}</div></div>
     </div>
    </div>
-   <div class="field"><label>Fecha de nacimiento</label><input id="f_birth" class="input" type="date" inputmode="none" value="${esc(birth)}" onclick="if(this.showPicker){try{this.showPicker()}catch(e){}}" onfocus="if(this.showPicker){try{this.showPicker()}catch(e){}}" onchange="updateStudentMinorFields()"></div>
+   <div class="field"><label>Fecha de nacimiento</label><input id="f_birth" class="input" type="text" readonly placeholder="dd/mm/aaaa" value="${esc(formatBirthDate(birth))}" data-iso="${esc(birth)}" onclick="openBirthCalendar('f_birth')"></div>
    <div class="field"><label>Edad</label><div id="f_age" class="input" style="display:flex;align-items:center;min-height:42px;background:#171a1f">—</div></div>
    <div class="field"><label>Teléfono del alumno</label><input id="f_phone" class="input" value="${esc(s?.phone||'')}"></div>
    <div class="field"><label>Correo</label><input id="f_email" class="input" type="email" value="${esc(s?.email||'')}"></div>
@@ -1339,10 +1351,10 @@ function openStudentModal(id=''){if(!isAdmin())return;
  setTimeout(updateStudentConditionalFields,0);
 }
 async function saveStudent(id){if(!isAdmin())return;
- const age=calculateAge($('f_birth').value||'');
+ const age=calculateAge(birthIso('f_birth'));
  const taking=$('f_medication').value==='yes';
  const physical=$('f_physical').value==='yes';
- const body={nombre_completo:$('f_name').value.trim(),fecha_nacimiento:$('f_birth').value||null,telefono:$('f_phone').value.trim()||null,email:$('f_email').value.trim()||null,domicilio:$('f_address').value.trim()||null,disciplina:$('f_disc').value,activo:$('f_active').value==='true',datos_fisicos:physical?($('f_physical_details').value.trim()||'Sí'):null,toma_medicacion:taking,detalle_medicacion:taking?($('f_medication_details').value.trim()||null):null,responsable_nombre:age!==null&&age<18?($('f_guardian_name')?.value.trim()||null):null,responsable_domicilio:age!==null&&age<18?($('f_guardian_address')?.value.trim()||null):null,responsable_celular:age!==null&&age<18?($('f_guardian_phone')?.value.trim()||null):null};
+ const body={nombre_completo:$('f_name').value.trim(),fecha_nacimiento:birthIso('f_birth')||null,telefono:$('f_phone').value.trim()||null,email:$('f_email').value.trim()||null,domicilio:$('f_address').value.trim()||null,disciplina:$('f_disc').value,activo:$('f_active').value==='true',datos_fisicos:physical?($('f_physical_details').value.trim()||'Sí'):null,toma_medicacion:taking,detalle_medicacion:taking?($('f_medication_details').value.trim()||null):null,responsable_nombre:age!==null&&age<18?($('f_guardian_name')?.value.trim()||null):null,responsable_domicilio:age!==null&&age<18?($('f_guardian_address')?.value.trim()||null):null,responsable_celular:age!==null&&age<18?($('f_guardian_phone')?.value.trim()||null):null};
  if(!body.nombre_completo){msg($('formMsg'),'Falta el nombre y apellido.','error');return}
  const previousPhotoPath=id?(data.students.find(s=>s.id===id)?._foto_path||''):'';
  let savedId=id;
@@ -1698,5 +1710,5 @@ async function deleteAuthority(id){if(!isAdmin())return;if(!await shanConfirm('E
 
 
 
-</body>
+<style id="shanryu-birth-calendar-css">.sr-date-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:240}.sr-date-card{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(94vw,420px);max-height:90vh;overflow:auto;background:#111419;border:1px solid #343a43;border-radius:20px;padding:16px;z-index:241}.sr-date-head,.sr-date-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.sr-date-head{grid-template-columns:1fr 1fr;margin:14px 0}.sr-date-week{text-align:center;color:#999;margin-bottom:6px}.sr-date-day{min-height:40px;border:1px solid #303640;border-radius:9px;background:#1c2128;color:#fff;font-weight:800}.sr-date-day.selected{background:#d71920}.sr-date-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}</style><div id="shanBirthCalendar" class="hidden"></div></body>
 </html>
