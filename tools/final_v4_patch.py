@@ -12,9 +12,10 @@ if "const na=$('newAnnouncementBtn'); if(na) na.classList.add('hidden');" not in
  setAdminActionButtons(false);
  const na=$('newAnnouncementBtn'); if(na) na.classList.add('hidden');
  const ai=$('authorityAdminIntro'); if(ai) ai.classList.add('hidden');"""
-    if old not in s:
-        raise SystemExit("No se encontró setupStudentUI")
-    s = s.replace(old, new, 1)
+    if old in s:
+        s = s.replace(old, new, 1)
+    else:
+        raise SystemExit("No se encontró setupStudentUI ni el ocultamiento ya aplicado")
 
 new_open = """async function openMaterial(path){
  if(!path){showModal('Archivo','<div class="empty">El material todavía no tiene un archivo asociado.</div>');return}
