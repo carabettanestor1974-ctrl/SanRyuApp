@@ -155,7 +155,7 @@ jobs:
 
       - name: Verificar correcciones antes de compilar
         run: |
-          grep -q "id="shanryu-birth-calendar"" app/src/main/assets/index.html
+          grep -q 'id="shanryu-birth-calendar"' app/src/main/assets/index.html
           grep -q "openBirthCalendar('prof_nacimiento')" app/src/main/assets/index.html
           grep -q "openBirthCalendar('reg_nacimiento')" app/src/main/assets/index.html
           grep -q "function acceptBirthCalendar" app/src/main/assets/index.html
