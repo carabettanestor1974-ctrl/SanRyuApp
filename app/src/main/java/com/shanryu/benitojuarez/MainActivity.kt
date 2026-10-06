@@ -82,6 +82,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(webView)
+        // Evitar que WebView reutilice una copia vieja del index.html después de actualizar la APK.
+        webView.clearCache(true)
         webView.loadUrl("https://appassets.androidplatform.net/assets/index.html")
     }
 
