@@ -4,18 +4,7 @@ import re
 html = Path("app/src/main/assets/index.html")
 s = html.read_text(encoding="utf-8")
 
-if "const na=$('newAnnouncementBtn'); if(na) na.classList.add('hidden');" not in s:
-    old = """function setupStudentUI(){
- setAdminActionButtons(false);
- const ai=$('authorityAdminIntro'); if(ai) ai.classList.add('hidden');"""
-    new = """function setupStudentUI(){
- setAdminActionButtons(false);
- const na=$('newAnnouncementBtn'); if(na) na.classList.add('hidden');
- const ai=$('authorityAdminIntro'); if(ai) ai.classList.add('hidden');"""
-    if old in s:
-        s = s.replace(old, new, 1)
-    else:
-        raise SystemExit("No se encontró setupStudentUI ni el ocultamiento ya aplicado")
+# Run 66 already contains the alumno + Aviso correction. This patch only adds the material-opening fix and bumps the APK version.
 
 new_open = """async function openMaterial(path){
  if(!path){showModal('Archivo','<div class="empty">El material todavía no tiene un archivo asociado.</div>');return}
