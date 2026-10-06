@@ -22,27 +22,6 @@ jobs:
           grep -q "function acceptBirthCalendar" app/src/main/assets/index.html
           grep -q 'id="f_photo"' app/src/main/assets/index.html
           grep -q 'id="prof_foto"' app/src/main/assets/index.html
-      - name: Habilitar comunicados para profesores
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path("app/src/main/assets/index.html")
-          s=p.read_text(encoding="utf-8")
-          s=s.replace("function openAnnouncementModal(id=''){if(!isAdmin())return;",
-                      "function openAnnouncementModal(id=''){if(!isAdmin()&&!isProfessor())return;")
-          s=s.replace("async function saveAnnouncement(id){if(!isAdmin())return;",
-                      "async function saveAnnouncement(id){if(!isAdmin()&&!isProfessor())return;")
-          s=s.replace("function setupProfessorUI(){",
-                      "function setupProfessorUI(){\n setProfessorAnnouncementButton();")
-          s=s.replace("function setAdminActionButtons(show){",
-                      "function setProfessorAnnouncementButton(){const el=$('newAnnouncementBtn');if(el)el.classList.remove('hidden');}\nfunction setAdminActionButtons(show){")
-          bt=chr(96); dl=chr(36)
-          old=dl+"{isAdmin()?"+bt+"<div class=\\"material-actions\\"><button class=\\"btn mini\\" onclick=\\"openAnnouncementModal('"+dl+"{a.id}')\\">Editar</button><button class=\\"btn danger mini\\" onclick=\\"confirmDeleteAnnouncement('"+dl+"{a.id}')\\">Eliminar</button></div>"+bt+":''}"
-          new=dl+"{(isAdmin()||isProfessor())?"+bt+"<div class=\\"material-actions\\"><button class=\\"btn mini\\" onclick=\\"openAnnouncementModal('"+dl+"{a.id}')\\">Editar</button>"+dl+"{isAdmin()?"+bt+"<button class=\\"btn danger mini\\" onclick=\\"confirmDeleteAnnouncement('"+dl+"{a.id}')\\">Eliminar</button>"+bt+":''}</div>"+bt+":''}"
-          s=s.replace(old,new)
-          p.write_text(s,encoding="utf-8")
-          PY
-          grep -q "setProfessorAnnouncementButton" app/src/main/assets/index.html
       - name: Preparar Java 17
         uses: actions/setup-java@v4
         with:
